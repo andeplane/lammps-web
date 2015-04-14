@@ -40,7 +40,6 @@ function systemSizeHalf() {
 }
 
 function glWindowWidth() {
-	console.log("Window size: "+$('#webglwindow').width()+" x "+$('#webglwindow').height() )
 	return $('#webglwindow').width();
 }
 
@@ -53,11 +52,9 @@ function init() {
 	container = document.createElement( 'div' );
 	webglwindow.appendChild( container );
 
+	var systemSizeHalfVec = systemSizeHalf();
 	camera = new THREE.PerspectiveCamera( 60, glWindowWidth() / glWindowHeight(), 2, 2000 );
 	
-	var systemSizeHalfVec = systemSizeHalf();
-	console.log("System size: "+systemSizeHalfVec)
-
 	camera.position.x = 2*systemSizeHalfVec.y;
 	camera.position.y = 2*systemSizeHalfVec.y;
 	camera.position.z = 6*systemSizeHalfVec.z;
@@ -82,7 +79,7 @@ function init() {
 
 	geometry = new THREE.Geometry();
 
-	sprite = THREE.ImageUtils.loadTexture( "disc.png" );
+	sprite = THREE.ImageUtils.loadTexture( "ball.png" );
 
 	var positions = md.positions();
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
@@ -159,13 +156,7 @@ function togglePause() {
 }
 
 function render() {
-	var time = Date.now() * 0.00005;				
-
-	h = ( 360 * ( 1.0 + time ) % 360 ) / 360;
-	material.color.setHSL( h, 0.5, 0.5 );
-
 	renderer.render( scene, camera );
-
 }
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
