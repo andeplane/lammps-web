@@ -11,6 +11,7 @@
    See the README file in the top-level LAMMPS directory.
 ------------------------------------------------------------------------- */
 #include <cstring>
+#include <iostream>
 #include <sstream>
 #include "atom.h"
 #include "domain.h"
@@ -22,21 +23,24 @@
 
 using namespace LAMMPS_NS;
 using namespace std;
-
+bool initialized = false;
 LAMMPS *lammps = 0;
 
 extern "C" {
 
 void checkInitialized() {
-  if(!lammps) {
-    lammps_open_no_mpi(0, 0, (void**)&lammps);
-  }
+    if(!initialized) {
+        cout << "Creating LAMMPS object" << endl;
+        lammps_open_no_mpi(0, 0, (void**)&lammps);
+        initialized = true;
+    } 
 }
 
 void resetLammps() {
     if(lammps) {
         lammps_close((void*)lammps);
         lammps = 0;
+        initialized = false;
     }
 }
 
@@ -49,6 +53,7 @@ void runCommands(const char *commands) {
     if (commands != NULL)
     {
         while(std::getline(ss,to,'\n')){
+            cout << "Running command " << to << endl;
             lammps->input->one(to.c_str());
         }
     }
@@ -70,15 +75,15 @@ int numberOfAtoms() {
     return lammps->atom->natoms;
 }
 
-int systemSizeX() {
+double systemSizeX() {
     return lammps->domain->xprd;
 }
 
-int systemSizeY() {
+double systemSizeY() {
     return lammps->domain->yprd;
 }
 
-int systemSizeZ() {
+double systemSizeZ() {
     return lammps->domain->zprd;
 }
 
