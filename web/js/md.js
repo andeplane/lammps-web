@@ -51,7 +51,7 @@ function init() {
 	var webglwindow = document.getElementById("webglwindow");
 	container = document.createElement( 'div' );
 	webglwindow.appendChild( container );
-
+	
 	var systemSizeHalfVec = systemSizeHalf();
 	camera = new THREE.PerspectiveCamera( 60, glWindowWidth() / glWindowHeight(), 2, 2000 );
 	
@@ -59,7 +59,7 @@ function init() {
 	camera.position.y = 2*systemSizeHalfVec.y;
 	camera.position.z = 6*systemSizeHalfVec.z;
 
-	controls = new THREE.TrackballControls( camera );
+	controls = new THREE.TrackballControls( camera, webglwindow);
 	controls.target.set( 0,0,0 )
 	controls.rotateSpeed = 1.0;
 	controls.zoomSpeed = 1.2;
@@ -80,17 +80,6 @@ function init() {
 	geometry = new THREE.Geometry();
 
 	sprite = THREE.ImageUtils.loadTexture( "ball.png" );
-
-	var positions = md.positions();
-	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		var vertex = new THREE.Vector3();
-		vertex.x = getValue(positions + 8*(3*i + 0), 'double');
-		vertex.y = getValue(positions + 8*(3*i + 1), 'double');
-		vertex.z = getValue(positions + 8*(3*i + 2), 'double');
-		vertex.sub(systemSizeHalfVec);
-
-		geometry.vertices.push( vertex );
-	}
 
 	material = new THREE.PointCloudMaterial( { size: 35, sizeAttenuation: false, map: sprite, alphaTest: 0.5, transparent: true } );
 	material.color.setHSL( 1.0, 0.3, 0.7 );
@@ -118,6 +107,16 @@ function onWindowResize() {
 function updateVertices() {
 	var systemSizeHalfVec = systemSizeHalf();
 	var systemSizeVec = systemSize();
+
+	if(geometry.vertices.length > md.numberOfAtoms()) {
+		geometry.vertices.length = md.numberOfAtoms();
+		geometry.colors.length = md.numberOfAtoms(); 
+	} else if(geometry.vertices.length < md.numberOfAtoms()) {
+		for(var i=geometry.vertices.length; i<md.numberOfAtoms(); i++) {
+			geometry.vertices.push( new THREE.Vector3() );
+			geometry.colors.push( new THREE.Color(0xffffff) );
+		}
+	}
 	
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
 		var positionPointer = getValue(md.x() + 8*i, '*');
@@ -135,13 +134,18 @@ function updateVertices() {
 	geometry.verticesNeedUpdate = true
 }
 
-function animate() {
-	md.runCommands("run 1 pre no post no");
-	updateVertices();
+var stop = false;
 
+function animate() {
+	if(!stop) {
+		md.runCommands("run 1 pre no post no");
+		updateVertices();
+	}
+	
 	animationId = requestAnimationFrame( animate );
 	controls.update();
 	render();
+	stop = true;
 }
 
 function togglePause() {
