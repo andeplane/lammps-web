@@ -6,7 +6,7 @@ LAMMPS_OBJ_FILES := $(addprefix obj/,$(notdir $(LAMMPS_SOURCE:.cpp=.o)))
 
 LD_FLAGS := 
 CC_FLAGS := -O3 
-SYMBOLS := -s TOTAL_MEMORY=$(MAXMEMORY) -s EXPORTED_FUNCTIONS="['_runCommands', '_checkInitialized', '_resetLammps', '_x', '_v', '_f', '_numberOfAtoms', '_systemSizeX', '_systemSizeY', '_systemSizeZ']"
+SYMBOLS := -s TOTAL_MEMORY=$(MAXMEMORY) -s EXPORTED_FUNCTIONS="['_runCommands', '_resetLammps', '_x', '_v', '_f', '_numberOfAtoms', '_systemSizeX', '_systemSizeY', '_systemSizeZ', '_positions']"
 
 lammpsj: obj web/js/lammps.js
 

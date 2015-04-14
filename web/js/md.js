@@ -1,43 +1,42 @@
 var md = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
-	checkInitialized: Module.cwrap('checkInitialized', 'void', []),
 	resetLammps: Module.cwrap('resetLammps', 'void', []),
 	numberOfAtoms: Module.cwrap('numberOfAtoms', 'number', []),
 	systemSizeX: Module.cwrap('systemSizeX', 'number', []),
 	systemSizeY: Module.cwrap('systemSizeY', 'number', []),
 	systemSizeZ: Module.cwrap('systemSizeZ', 'number', []),
+	positions: Module.cwrap('positions', 'number', []),
 	x: Module.cwrap('x', 'number', []),
 	v: Module.cwrap('v', 'number', []),
 	f: Module.cwrap('f', 'number', []),
 	initialized: false
 }
 
-var sysx = Module.cwrap('systemSizeX', 'number', []);
+Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
 
 var runScript = function() {
 	var content = document.getElementById("lammpsCode").value
-	console.log("Running script...");
+	
 	setTimeout(
 		function() { 
 			md.runCommands(content)
-
+			document.getElementById("runScriptButton").disabled = true;
+			document.getElementById("stopButton").disabled = false;
+			
 			if(!md.initialized) {
-				var logger = document.getElementById('log');
-				console.log = function (message) {
-				    if (typeof message == 'object') {
-				        logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '\n';
-				    } else {
-				        logger.innerHTML += message + '\n';
-				    }
-				}
 				init()
+				animate()
 				md.initialized = true
 			}
 		}, 500);
 }
 
+function systemSize() {
+	return new THREE.Vector3(md.systemSizeX(), md.systemSizeY(), md.systemSizeZ());;
+}
+
 function systemSizeHalf() {
-	return new THREE.Vector3(0.5*md.systemSizeX(), 0.5*md.systemSizeY(), 0.5*md.systemSizeZ());;
+	return systemSize().multiplyScalar(0.5);
 }
 
 function glWindowWidth() {
@@ -85,13 +84,12 @@ function init() {
 
 	sprite = THREE.ImageUtils.loadTexture( "disc.png" );
 
+	var positions = md.positions();
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		var positionPointer = getValue(md.x() + 8*i, '*');
-
 		var vertex = new THREE.Vector3();
-		vertex.x = getValue(positionPointer, 'double');
-		vertex.y = getValue(positionPointer + 8, 'double');
-		vertex.z = getValue(positionPointer + 16, 'double');
+		vertex.x = getValue(positions + 8*(3*i + 0), 'double');
+		vertex.y = getValue(positions + 8*(3*i + 1), 'double');
+		vertex.z = getValue(positions + 8*(3*i + 2), 'double');
 		vertex.sub(systemSizeHalfVec);
 
 		geometry.vertices.push( vertex );
@@ -122,28 +120,42 @@ function onWindowResize() {
 
 function updateVertices() {
 	var systemSizeHalfVec = systemSizeHalf();
-
+	var systemSizeVec = systemSize();
+	
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
 		var positionPointer = getValue(md.x() + 8*i, '*');
-		geometry.vertices[i].x = getValue(positionPointer, 'double');
-		geometry.vertices[i].y = getValue(positionPointer + 8, 'double');
-		geometry.vertices[i].z = getValue(positionPointer + 16, 'double');
+		var x = Math.fmod(getValue(positionPointer, 'double'), systemSizeVec.x);
+		var y = Math.fmod(getValue(positionPointer + 8, 'double'), systemSizeVec.y);
+		var z = Math.fmod(getValue(positionPointer + 16, 'double'), systemSizeVec.z);
+
+		geometry.vertices[i].x = x;
+		geometry.vertices[i].y = y;
+		geometry.vertices[i].z = z;
+		
 		geometry.vertices[i].sub(systemSizeHalfVec);
 	}
 
 	geometry.verticesNeedUpdate = true
 }
 
-var balle = 1
-
 function animate() {
-	console.log("Animating...");
 	md.runCommands("run 1 pre no post no");
 	updateVertices();
 
-	requestAnimationFrame( animate );
+	animationId = requestAnimationFrame( animate );
 	controls.update();
 	render();
+}
+
+function togglePause() {
+	if(pause) {
+		document.getElementById("stopButton").innerHTML = "Pause";
+		animate();
+	} else {
+		document.getElementById("stopButton").innerHTML = "Unpause";
+		cancelAnimationFrame(animationId);
+	}
+	pause = !pause;
 }
 
 function render() {
@@ -158,8 +170,8 @@ function render() {
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
+var animationId;
 var camera, controls, scene, renderer, particles, geometry, material, i, h, color, sprite, size;
 var mouseX = 0, mouseY = 0;
 var theta = 0, phi = 0;
-// init();
-// animate();
+var pause = false;

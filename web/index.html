@@ -17,9 +17,9 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-lg-6">
-			<button type="button" onClick="runScript()">Run script</button> Lammps script:<br>
-			<textarea id="lammpsCode" rows="20" cols="100">
+		<div class="col-lg-4">
+			<button id="runScriptButton" type="button" onClick="runScript()">Run script</button><button id="stopButton" type="button" onClick="togglePause();" disabled>Pause</button>Lammps script:<br>
+			<textarea id="lammpsCode" style="width: 100%; height: 100%;" rows="20" cols="150">
 			# 3d Lennard-Jones melt
 
 			units		lj
@@ -53,12 +53,8 @@
 			#------------------------------------------------------------------------------#  
 
 			</textarea>
-			<br>
-			Output (note, running can take a minute or two):<br>
-			<textarea id="log" rows="20" cols="100">
-			</textarea>
 		</div>
-		<div id="webglwindow" class="col-lg-6" style="height: 100vh;">
+		<div id="webglwindow" class="col-lg-8" style="height: 100vh;">
 			
 		</div>
 	</div>
