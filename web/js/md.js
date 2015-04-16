@@ -170,13 +170,8 @@ function animate() {
 	controls.update();
 	updateVertices();
 	render();
-	var up = camera.up;
-	var view = new THREE.Vector3().copy(camera.getWorldDirection()).normalize();
-	var right = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
-	var cam = camera.position;
-	console.log("Camera pos: ("+cam.x.toFixed(2)+", "+cam.y.toFixed(2)+", "+cam.z.toFixed(2)+") and view: ("+view.x.toFixed(2)+", "+view.y.toFixed(2)+", "+view.z.toFixed(2)+") and up vector: ("+up.x.toFixed(2)+", "+up.y.toFixed(2)+", "+up.z.toFixed(2)+") and right: ("+right.x.toFixed(2)+", "+right.y.toFixed(2)+", "+right.z.toFixed(2)+")");
 	
-	// stop = true;
+	stop = true;
 }
 
 function togglePause() {
