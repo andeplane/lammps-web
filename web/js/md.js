@@ -133,12 +133,19 @@ function updateVertices() {
 	positions.length = md.numberOfAtoms();
 	var colors = [];
 	colors.length = md.numberOfAtoms();
+	var atomPositions = md.positions();
 
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		var positionPointer = getValue(md.x() + 8*i, '*');
-		var x = Math.fmod(getValue(positionPointer, 'double'), systemSizeVec.x);
-		var y = Math.fmod(getValue(positionPointer + 8, 'double'), systemSizeVec.y);
-		var z = Math.fmod(getValue(positionPointer + 16, 'double'), systemSizeVec.z);
+		// var positionPointer = getValue(md.x() + 8*i, '*');
+		// var x = Math.fmod(getValue(positionPointer, 'double'), systemSizeVec.x);
+		// var y = Math.fmod(getValue(positionPointer + 8, 'double'), systemSizeVec.y);
+		// var z = Math.fmod(getValue(positionPointer + 16, 'double'), systemSizeVec.z);
+		// var x = getValue(positionPointer, 'double');
+		// var y = getValue(positionPointer + 8, 'double');
+		// var z = getValue(positionPointer + 16, 'double');
+		var x = getValue(atomPositions + 24*i, 'double');
+		var y = getValue(atomPositions + 24*i + 8, 'double');
+		var z = getValue(atomPositions + 24*i + 16, 'double');
 
 		positions[i] = new THREE.Vector3(x,y,z);
 		positions[i].sub(systemSizeHalfVec);
@@ -169,7 +176,7 @@ function animate() {
 	var cam = camera.position;
 	console.log("Camera pos: ("+cam.x.toFixed(2)+", "+cam.y.toFixed(2)+", "+cam.z.toFixed(2)+") and view: ("+view.x.toFixed(2)+", "+view.y.toFixed(2)+", "+view.z.toFixed(2)+") and up vector: ("+up.x.toFixed(2)+", "+up.y.toFixed(2)+", "+up.z.toFixed(2)+") and right: ("+right.x.toFixed(2)+", "+right.y.toFixed(2)+", "+right.z.toFixed(2)+")");
 	
-	stop = true;
+	// stop = true;
 }
 
 function togglePause() {

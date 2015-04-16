@@ -71,13 +71,13 @@ double **f() {
     return lammps->atom->f;
 }
 
-double *positions(int particleIndex) {
-    positionsVector.resize(lammps->atom->natoms);
+double *positions() {
+    positionsVector.resize(3*lammps->atom->natoms);
     double pos[3];
     for(unsigned int i=0; i<lammps->atom->natoms; i++) {
-        pos[0] = lammps->atom->x[particleIndex][0];
-        pos[1] = lammps->atom->x[particleIndex][1];
-        pos[2] = lammps->atom->x[particleIndex][2];
+        pos[0] = lammps->atom->x[i][0];
+        pos[1] = lammps->atom->x[i][1];
+        pos[2] = lammps->atom->x[i][2];
         lammps->domain->remap(pos);
         positionsVector[3*i+0] = pos[0];
         positionsVector[3*i+1] = pos[1];

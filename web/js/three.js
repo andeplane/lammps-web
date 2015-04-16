@@ -16712,7 +16712,7 @@ THREE.BillboardSpheres.prototype.update = function ( points, colors, up, right )
 	var v_vertices = new Float32Array( 4*points.length * 3 );
 	var v_colors = new Float32Array( 4*points.length * 3 );
 	var v_uvs = new Float32Array( 4*points.length * 3 );
-	var v_indices = new ( ( points.length * 6 ) > 65535 ? Uint32Array : Uint16Array )( points.length * 6 );
+	var v_indices = new Uint32Array( points.length * 6 );
 	
 	for ( var i = 0; i < points.length; i ++ ) {
 		// i = i | 0;
