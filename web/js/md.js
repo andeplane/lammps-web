@@ -82,16 +82,33 @@ function init() {
 	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
 	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
 
-	material = new THREE.ShaderMaterial({
-		uniforms: {},
-		attributes: [],
-		vertexShader: document.getElementById('vertexShader').textContent,
-		fragmentShader: document.getElementById('fragmentShader').textContent
-	});
+	var map = THREE.ImageUtils.loadTexture('images/sphere.png');
+	var normal = THREE.ImageUtils.loadTexture('images/normalMap.png');
+	normal.flipy = true
 	
-	geometry = new THREE.Billboards(camera, material);
+	var material = new THREE.BillboardSpheresMaterial( { 
+	// var material = new THREE.MeshPhongMaterial( { 
+		ambient: 0x050505, 
+		color: 0x0033ff, 
+		specular: 0x555555, 
+		shininess: 30,
+		map: map,
+		normalMap: normal,
+		wrapAround: true,
+		transparent: true,
+		alphaTest: 0.95
+	} );
+	
+	geometry = new THREE.BillboardSpheres(camera);
 	var mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
+
+	var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+	scene.add( light );
+
+	var directional = new THREE.DirectionalLight( 0xffffff );
+	directional.position.set( 0, 1, 1 ).normalize();
+	scene.add(directional);
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -152,7 +169,7 @@ function animate() {
 	var cam = camera.position;
 	console.log("Camera pos: ("+cam.x.toFixed(2)+", "+cam.y.toFixed(2)+", "+cam.z.toFixed(2)+") and view: ("+view.x.toFixed(2)+", "+view.y.toFixed(2)+", "+view.z.toFixed(2)+") and up vector: ("+up.x.toFixed(2)+", "+up.y.toFixed(2)+", "+up.z.toFixed(2)+") and right: ("+right.x.toFixed(2)+", "+right.y.toFixed(2)+", "+right.z.toFixed(2)+")");
 	
-	//stop = true;
+	stop = true;
 }
 
 function togglePause() {
