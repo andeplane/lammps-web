@@ -53,11 +53,8 @@ function init() {
 	webglwindow.appendChild( container );
 	
 	var systemSizeHalfVec = systemSizeHalf();
-	camera = new THREE.PerspectiveCamera( 60, glWindowWidth() / glWindowHeight(), 2, 2000 );
-	
-	camera.position.x = 0;
-	camera.position.y = 0;
-	camera.position.z = -6*systemSizeHalfVec.z;
+	camera = new THREE.PerspectiveCamera( 60, glWindowWidth() / glWindowHeight(), 0.1, 2000 );
+	camera.position.z = -10;
 
 	controls = new THREE.TrackballControls( camera, webglwindow);
 	controls.target.set( 0,0,0 )
@@ -78,50 +75,43 @@ function init() {
 	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2( 0x000000, 0.001 );
 
-	upVector = new THREE.Vector3().copy(camera.up);
-	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
-	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
-
 	var map = THREE.ImageUtils.loadTexture('images/sphere.png');
 	var normal = THREE.ImageUtils.loadTexture('images/normalMap.png');
-	normal.flipy = true
 	
-	var material = new THREE.BillboardSpheresMaterial( { 
-	// var material = new THREE.MeshPhongMaterial( { 
+	material = new THREE.BillboardSpheresMaterial( { 
 		ambient: 0x050505, 
-		color: 0x0033ff, 
+		color: 0xffff00, 
 		specular: 0x555555, 
 		shininess: 30,
 		map: map,
 		normalMap: normal,
-		wrapAround: true,
-		transparent: true,
-		alphaTest: 0.95
+		wrapAround: false,
+		transparent: true
 	} );
 	
-	geometry = new THREE.BillboardSpheres(camera);
-	var mesh = new THREE.Mesh( geometry, material );
+	// geometry = new THREE.BillboardSpheres();
+	geometry = new THREE.Geometry();
+	mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
 
 	var light = new THREE.AmbientLight( 0x404040 ); // soft white light
 	scene.add( light );
 
 	var directional = new THREE.DirectionalLight( 0xffffff );
-	directional.position.set( 0, 1, 1 ).normalize();
+	directional.position.set( 0, -systemSizeHalfVec.z, -systemSizeHalfVec.z).normalize();
 	scene.add(directional);
-
+	
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( glWindowWidth(), glWindowHeight() );
 	container.appendChild( renderer.domElement );
-
+	
 	window.addEventListener( 'resize', onWindowResize, false );
 }
 
 function onWindowResize() {
 	camera.aspect = glWindowWidth() / glWindowHeight()
 	camera.updateProjectionMatrix();
-
 	renderer.setSize( glWindowWidth(), glWindowHeight() );
 }
 
@@ -135,28 +125,41 @@ function updateVertices() {
 	colors.length = md.numberOfAtoms();
 	var atomPositions = md.positions();
 
+	geometry.vertices.length = 4*md.numberOfAtoms();
+	geometry.colors.length = 4*md.numberOfAtoms();
+	geometry.faces.length = 2*md.numberOfAtoms();
+	geometry.faceVertexUvs[0].length = 2*md.numberOfAtoms();
+
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		// var positionPointer = getValue(md.x() + 8*i, '*');
-		// var x = Math.fmod(getValue(positionPointer, 'double'), systemSizeVec.x);
-		// var y = Math.fmod(getValue(positionPointer + 8, 'double'), systemSizeVec.y);
-		// var z = Math.fmod(getValue(positionPointer + 16, 'double'), systemSizeVec.z);
-		// var x = getValue(positionPointer, 'double');
-		// var y = getValue(positionPointer + 8, 'double');
-		// var z = getValue(positionPointer + 16, 'double');
 		var x = getValue(atomPositions + 24*i, 'double');
 		var y = getValue(atomPositions + 24*i + 8, 'double');
 		var z = getValue(atomPositions + 24*i + 16, 'double');
 
-		positions[i] = new THREE.Vector3(x,y,z);
-		positions[i].sub(systemSizeHalfVec);
-		colors[i] = new THREE.Vector3(1.0, 0.0, 0.0);
+		// positions[i] = new THREE.Vector3(x,y,z);
+		// positions[i].sub(systemSizeHalfVec);
+		// colors[i] = new THREE.Vector3(1.0, 0.0, 0.0);
+		var pos = new THREE.Vector3(x,y,z);
+		pos.sub(systemSizeHalfVec);
+
+		geometry.colors[4*i+0] = new THREE.Vector3(1.0, 0.0, 0.0);
+		geometry.colors[4*i+1] = new THREE.Vector3(1.0, 0.0, 0.0);
+		geometry.colors[4*i+2] = new THREE.Vector3(1.0, 0.0, 0.0);
+		geometry.colors[4*i+3] = new THREE.Vector3(1.0, 0.0, 0.0);
+		geometry.vertices[4*i+0] = pos;
+		geometry.vertices[4*i+1] = pos;
+		geometry.vertices[4*i+2] = pos;
+		geometry.vertices[4*i+3] = pos;
+		geometry.faces[2*i+0] = new THREE.Face3(4*i+0, 4*i+1, 4*i+2);
+		geometry.faces[2*i+1] = new THREE.Face3(4*i+2, 4*i+3, 4*i+0);
+		geometry.faceVertexUvs[0][2*i+0] = [new THREE.Vector2(1,0), new THREE.Vector2(1,1), new THREE.Vector2(0,1)];
+		geometry.faceVertexUvs[0][2*i+1] = [new THREE.Vector2(0,1), new THREE.Vector2(0,0), new THREE.Vector2(1,0)];
 	}
-	upVector = new THREE.Vector3().copy(camera.up);
-	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
-	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
+	// geometry.computeBoundingSphere();
 	
-	geometry.update(positions, colors, upVector, rightVector);
+	geometry.colorsNeedUpdate = true
 	geometry.verticesNeedUpdate = true
+	geometry.elementsNeedUpdate = true
+	geometry.uvsNeedUpdate = true
 }
 
 var stop = false;
@@ -171,7 +174,7 @@ function animate() {
 	updateVertices();
 	render();
 	
-	stop = true;
+	// stop = true;
 }
 
 function togglePause() {
@@ -186,6 +189,14 @@ function togglePause() {
 }
 
 function render() {
+	mesh.updateMatrix();
+	camera.updateMatrixWorld();
+	console.log("Camera pos: "+camera.position.x+" "+camera.position.y+" "+camera.position.z);
+	upVector = new THREE.Vector3().copy(camera.up);
+	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
+	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
+	console.log("Up: "+upVector.x+", "+upVector.y+", "+upVector.z)
+	console.log("Right: "+rightVector.x+", "+rightVector.y+", "+rightVector.z)
 	renderer.render( scene, camera );
 }
 
@@ -193,6 +204,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
 var animationId;
 var camera, controls, scene, renderer, particles, geometry, material, i, h, color, sprite, size;
+var mesh;
 var rightVector, upVector, viewVector;
 var mouseX = 0, mouseY = 0;
 var theta = 0, phi = 0;
