@@ -80,16 +80,15 @@ function init() {
 	
 	material = new THREE.BillboardSpheresMaterial( { 
 		ambient: 0x050505, 
-		color: 0xffff00, 
 		specular: 0x555555, 
 		shininess: 30,
-		map: map,
+		vertexColors: THREE.FaceColors,
+		// map: map,
 		normalMap: normal,
 		wrapAround: false,
 		transparent: true
 	} );
 	
-	// geometry = new THREE.BillboardSpheres();
 	geometry = new THREE.Geometry();
 	mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
@@ -126,7 +125,6 @@ function updateVertices() {
 	var atomPositions = md.positions();
 
 	geometry.vertices.length = 4*md.numberOfAtoms();
-	geometry.colors.length = 4*md.numberOfAtoms();
 	geometry.faces.length = 2*md.numberOfAtoms();
 	geometry.faceVertexUvs[0].length = 2*md.numberOfAtoms();
 
@@ -134,29 +132,20 @@ function updateVertices() {
 		var x = getValue(atomPositions + 24*i, 'double');
 		var y = getValue(atomPositions + 24*i + 8, 'double');
 		var z = getValue(atomPositions + 24*i + 16, 'double');
-
-		// positions[i] = new THREE.Vector3(x,y,z);
-		// positions[i].sub(systemSizeHalfVec);
-		// colors[i] = new THREE.Vector3(1.0, 0.0, 0.0);
 		var pos = new THREE.Vector3(x,y,z);
 		pos.sub(systemSizeHalfVec);
+		var color = new THREE.Color(1.0, 0.0, 0.0);
 
-		geometry.colors[4*i+0] = new THREE.Vector3(1.0, 0.0, 0.0);
-		geometry.colors[4*i+1] = new THREE.Vector3(1.0, 0.0, 0.0);
-		geometry.colors[4*i+2] = new THREE.Vector3(1.0, 0.0, 0.0);
-		geometry.colors[4*i+3] = new THREE.Vector3(1.0, 0.0, 0.0);
 		geometry.vertices[4*i+0] = pos;
 		geometry.vertices[4*i+1] = pos;
 		geometry.vertices[4*i+2] = pos;
 		geometry.vertices[4*i+3] = pos;
-		geometry.faces[2*i+0] = new THREE.Face3(4*i+0, 4*i+1, 4*i+2);
-		geometry.faces[2*i+1] = new THREE.Face3(4*i+2, 4*i+3, 4*i+0);
+		geometry.faces[2*i+0] = new THREE.Face3(4*i+0, 4*i+1, 4*i+2, [], color);
+		geometry.faces[2*i+1] = new THREE.Face3(4*i+2, 4*i+3, 4*i+0, [], color);
 		geometry.faceVertexUvs[0][2*i+0] = [new THREE.Vector2(1,0), new THREE.Vector2(1,1), new THREE.Vector2(0,1)];
 		geometry.faceVertexUvs[0][2*i+1] = [new THREE.Vector2(0,1), new THREE.Vector2(0,0), new THREE.Vector2(1,0)];
 	}
-	// geometry.computeBoundingSphere();
 	
-	geometry.colorsNeedUpdate = true
 	geometry.verticesNeedUpdate = true
 	geometry.elementsNeedUpdate = true
 	geometry.uvsNeedUpdate = true
