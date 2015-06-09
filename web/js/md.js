@@ -81,24 +81,38 @@ function init() {
 	material = new THREE.BillboardSpheresMaterial( { 
 		ambient: 0x050505, 
 		specular: 0x555555, 
-		shininess: 30,
+		shininess: 0,
 		vertexColors: THREE.FaceColors,
 		// map: map,
 		normalMap: normal,
 		wrapAround: false,
 		transparent: true
 	} );
+
+	// material = new THREE.RawShaderMaterial({
+	// 	uniforms: THREE.UniformsLib['lights'],
+	// 	attributes: [],
+	// 	vertexShader: vertexShader,
+ //  		fragmentShader: fragmentShader,
+ //  		shininess: 30,
+ //  		ambient: 0x050505, 
+ //  		specular: 0x555555, 
+ //  		lights: true,
+ //  		vertexColors: THREE.FaceColors,
+ //  		wrapAround: false,
+ //  		transparent: true
+	// });
 	
 	geometry = new THREE.Geometry();
 	mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
 
-	var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-	scene.add( light );
+	lights.ambient = new THREE.AmbientLight( 0x404040 ); // soft white light
+	scene.add( lights.ambient );
 
-	var directional = new THREE.DirectionalLight( 0xffffff );
-	directional.position.set( 0, -systemSizeHalfVec.z, -systemSizeHalfVec.z).normalize();
-	scene.add(directional);
+	lights.directional = new THREE.DirectionalLight( 0xffffff );
+	lights.directional.position.set( 0, 0, -10);
+	scene.add(lights.directional);
 	
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -180,16 +194,21 @@ function togglePause() {
 function render() {
 	mesh.updateMatrix();
 	camera.updateMatrixWorld();
-	console.log("Camera pos: "+camera.position.x+" "+camera.position.y+" "+camera.position.z);
+	// console.log("Camera pos: "+camera.position.x+" "+camera.position.y+" "+camera.position.z);
 	upVector = new THREE.Vector3().copy(camera.up);
 	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
 	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
-	console.log("Up: "+upVector.x+", "+upVector.y+", "+upVector.z)
-	console.log("Right: "+rightVector.x+", "+rightVector.y+", "+rightVector.z)
+
+	// console.log("Up: "+upVector.x+", "+upVector.y+", "+upVector.z)
+	// console.log("Right: "+rightVector.x+", "+rightVector.y+", "+rightVector.z)
+	t = (Date.now() - t0) / 1000;
+	lights.directional.position.set(0, 0, 10*Math.cos(0.1*2*Math.PI*t));
 	renderer.render( scene, camera );
 }
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+var t0 = Date.now();
+var lights = {}
 var container;
 var animationId;
 var camera, controls, scene, renderer, particles, geometry, material, i, h, color, sprite, size;
