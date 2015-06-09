@@ -1,6 +1,7 @@
 var md = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
-	resetLammps: Module.cwrap('resetLammps', 'void', []),
+	reset: Module.cwrap('reset', 'void', []),
+	runDefault: Module.cwrap('runDefaultScript', 'void', []),
 	numberOfAtoms: Module.cwrap('numberOfAtoms', 'number', []),
 	systemSizeX: Module.cwrap('systemSizeX', 'number', []),
 	systemSizeY: Module.cwrap('systemSizeY', 'number', []),
