@@ -1,5 +1,23 @@
+var maxNumAtoms = 10;
+var position = new Float32Array( 12*maxNumAtoms );
+var radii = new Float32Array( 4*maxNumAtoms );
+var vertexId = new Uint8Array( 4*maxNumAtoms );
+var indexBuffer = new Uint32Array( 6*maxNumAtoms );
+
+function reallocate() {
+    position = new Float32Array( 12*maxNumAtoms );
+    radii = new Float32Array( 4*maxNumAtoms );
+    vertexId = new Uint8Array( 4*maxNumAtoms );
+    indexBuffer = new Uint32Array( 6*maxNumAtoms );
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
+    geometry.addAttribute( 'vertexId', new THREE.BufferAttribute( vertexId, 1 ) );
+    geometry.addAttribute( 'radius', new THREE.BufferAttribute( radii, 1 ) );
+    geometry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
+}
+
 var md = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
+	active: Module.cwrap('active', 'bool', []),
 	reset: Module.cwrap('reset', 'void', []),
 	runDefault: Module.cwrap('runDefaultScript', 'void', []),
 	numberOfAtoms: Module.cwrap('numberOfAtoms', 'number', []),
@@ -53,73 +71,47 @@ function init() {
 	container = document.createElement( 'div' );
 	webglwindow.appendChild( container );
 	
-	var systemSizeHalfVec = systemSizeHalf();
-	camera = new THREE.PerspectiveCamera( 60, glWindowWidth() / glWindowHeight(), 0.1, 2000 );
-	camera.position.z = -10;
-
-	controls = new THREE.TrackballControls( camera, webglwindow);
-	controls.target.set( 0,0,0 )
-	controls.rotateSpeed = 1.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-
-	controls.noZoom = false;
-	controls.noPan = false;
-	controls.noRoll = true;
-
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
-
-	controls.keys = [ 65, 83, 68 ];
-	controls.addEventListener( 'change', render );
-
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2( 0x000000, 0.001 );
 
-	var map = THREE.ImageUtils.loadTexture('images/sphere.png');
-	var normal = THREE.ImageUtils.loadTexture('images/normalMap.png');
-	
-	material = new THREE.BillboardSpheresMaterial( { 
-		ambient: 0x050505, 
-		specular: 0x555555, 
-		shininess: 0,
-		vertexColors: THREE.FaceColors,
-		// map: map,
-		normalMap: normal,
-		wrapAround: false,
-		transparent: true
-	} );
+	var systemSizeHalfVec = systemSizeHalf();
+	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+    camera.position.z = 5;
+    camera.position.y = 5;
+    camera.position.x = 5;
+    controls = new THREE.OrbitControls( camera );
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.dampingFactor = 0.3;
+    controls.keys = [ 65, 83, 68 ];
+    controls.addEventListener( 'change', render );
 
-	// material = new THREE.RawShaderMaterial({
-	// 	uniforms: THREE.UniformsLib['lights'],
-	// 	attributes: [],
-	// 	vertexShader: vertexShader,
- //  		fragmentShader: fragmentShader,
- //  		shininess: 30,
- //  		ambient: 0x050505, 
- //  		specular: 0x555555, 
- //  		lights: true,
- //  		vertexColors: THREE.FaceColors,
- //  		wrapAround: false,
- //  		transparent: true
-	// });
+	geometry = new THREE.BufferGeometry();
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
+    geometry.addAttribute( 'vertexId', new THREE.BufferAttribute( vertexId, 1 ) );
+    geometry.addAttribute( 'radius', new THREE.BufferAttribute( radii, 1 ) );
+    geometry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
+    updateVertices();
+
+    material = new THREE.ShaderMaterial( {
+        uniforms: {
+            time: { value: 1.0 },
+            resolution: { value: new THREE.Vector2() }
+        },
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+    } );
 	
-	geometry = new THREE.Geometry();
 	mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
 
-	lights.ambient = new THREE.AmbientLight( 0x404040 ); // soft white light
-	scene.add( lights.ambient );
-
-	lights.directional = new THREE.DirectionalLight( 0xffffff );
-	lights.directional.position.set( 0, 0, -10);
-	scene.add(lights.directional);
-	
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( glWindowWidth(), glWindowHeight() );
 	container.appendChild( renderer.domElement );
-	
+	onWindowResize()
 	window.addEventListener( 'resize', onWindowResize, false );
 }
 
@@ -132,38 +124,54 @@ function onWindowResize() {
 function updateVertices() {
 	var systemSizeHalfVec = systemSizeHalf();
 	var systemSizeVec = systemSize();
-
-	var positions = [];
-	positions.length = md.numberOfAtoms();
-	var colors = [];
-	colors.length = md.numberOfAtoms();
-	var atomPositions = md.positions();
-
-	geometry.vertices.length = 4*md.numberOfAtoms();
-	geometry.faces.length = 2*md.numberOfAtoms();
-	geometry.faceVertexUvs[0].length = 2*md.numberOfAtoms();
+	if(maxNumAtoms !== md.numberOfAtoms()) {
+		maxNumAtoms = md.numberOfAtoms()
+		console.log("Reallocating memory to support ", maxNumAtoms, " atoms.")
+		reallocate()
+	}
 
 	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		var x = getValue(atomPositions + 24*i, 'double');
-		var y = getValue(atomPositions + 24*i + 8, 'double');
-		var z = getValue(atomPositions + 24*i + 16, 'double');
-		var pos = new THREE.Vector3(x,y,z);
-		pos.sub(systemSizeHalfVec);
-		var color = new THREE.Color(1.0, 0.0, 0.0);
+		var x = getValue(md.positions() + 24*i, 'double') - systemSizeHalfVec.x;
+		var y = getValue(md.positions() + 24*i + 8, 'double') - systemSizeHalfVec.y;
+		var z = getValue(md.positions() + 24*i + 16, 'double') - systemSizeHalfVec.z;
 
-		geometry.vertices[4*i+0] = pos;
-		geometry.vertices[4*i+1] = pos;
-		geometry.vertices[4*i+2] = pos;
-		geometry.vertices[4*i+3] = pos;
-		geometry.faces[2*i+0] = new THREE.Face3(4*i+0, 4*i+1, 4*i+2, [], color);
-		geometry.faces[2*i+1] = new THREE.Face3(4*i+2, 4*i+3, 4*i+0, [], color);
-		geometry.faceVertexUvs[0][2*i+0] = [new THREE.Vector2(1,0), new THREE.Vector2(1,1), new THREE.Vector2(0,1)];
-		geometry.faceVertexUvs[0][2*i+1] = [new THREE.Vector2(0,1), new THREE.Vector2(0,0), new THREE.Vector2(1,0)];
+		var radius = 0.1;
+		position[12*i+0] = x;
+        position[12*i+1] = y;
+        position[12*i+2] = z;
+
+        position[12*i+3] = x;
+        position[12*i+4] = y;
+        position[12*i+5] = z;
+
+        position[12*i+6] = x;
+        position[12*i+7] = y;
+        position[12*i+8] = z;
+
+        position[12*i+9] = x;
+        position[12*i+10] = y;
+        position[12*i+11] = z;
+
+        vertexId[4*i+0] = 0.0;
+        vertexId[4*i+1] = 1.0;
+        vertexId[4*i+2] = 2.0;
+        vertexId[4*i+3] = 3.0;
+        radii[4*i+0] = radius;
+        radii[4*i+1] = radius;
+        radii[4*i+2] = radius;
+        radii[4*i+3] = radius;
+
+        indexBuffer[6*i+0] = 4*i+0;
+        indexBuffer[6*i+1] = 4*i+3;
+        indexBuffer[6*i+2] = 4*i+2;
+        indexBuffer[6*i+3] = 4*i+0;
+        indexBuffer[6*i+4] = 4*i+1;
+        indexBuffer[6*i+5] = 4*i+3;
 	}
 	
-	geometry.verticesNeedUpdate = true
-	geometry.elementsNeedUpdate = true
-	geometry.uvsNeedUpdate = true
+	geometry.getAttribute("position").needsUpdate = true
+    geometry.getAttribute("vertexId").needsUpdate = true
+    geometry.getAttribute("radius").needsUpdate = true
 }
 
 var stop = false;
@@ -177,8 +185,6 @@ function animate() {
 	controls.update();
 	updateVertices();
 	render();
-	
-	// stop = true;
 }
 
 function togglePause() {
@@ -193,17 +199,9 @@ function togglePause() {
 }
 
 function render() {
-	mesh.updateMatrix();
-	camera.updateMatrixWorld();
-	// console.log("Camera pos: "+camera.position.x+" "+camera.position.y+" "+camera.position.z);
-	upVector = new THREE.Vector3().copy(camera.up);
-	viewVector = new THREE.Vector3( 0, 0, -1 ).applyQuaternion( camera.quaternion );
-	rightVector = new THREE.Vector3( 1, 0, 0 ).applyQuaternion( camera.quaternion );
-
-	// console.log("Up: "+upVector.x+", "+upVector.y+", "+upVector.z)
-	// console.log("Right: "+rightVector.x+", "+rightVector.y+", "+rightVector.z)
 	t = (Date.now() - t0) / 1000;
-	lights.directional.position.set(0, 0, 10*Math.cos(0.1*2*Math.PI*t));
+	mesh.updateMatrix();
+    camera.updateMatrixWorld();
 	renderer.render( scene, camera );
 }
 

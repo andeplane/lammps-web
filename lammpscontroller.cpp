@@ -29,18 +29,52 @@ LAMMPS *lammps = 0;
 vector<string> commands;
 bool runCommandActive = false;
 int simulationSpeed = 1;
-
 extern "C" {
 void reset() {
     if(lammps) {
         lammps_close((void*)lammps);
         lammps = 0;
     }
-
     lammps_open_no_mpi(0, 0, (void**)&lammps);
-    // lammps->screen = NULL;
+    lammps->screen = NULL;
     commands.clear();
     runCommandActive = false;
+}
+
+int numberOfAtoms() {
+    return lammps->atom->natoms;
+}
+
+bool active() {
+    return lammps != 0;
+}
+
+double systemSizeX() {
+    return lammps->domain->xprd;
+}
+
+double systemSizeY() {
+    return lammps->domain->xprd;
+}
+
+double systemSizeZ() {
+    return lammps->domain->xprd;
+}
+
+double *positions() {
+    return lammps->atom->x[0];
+}
+
+double **x() {
+    return lammps->atom->x;
+}
+
+double **v() {
+    return lammps->atom->v;
+}
+
+double **f() {
+    return lammps->atom->f;
 }
 
 void runCommands(const char *commands) {

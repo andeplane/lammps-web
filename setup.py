@@ -4,7 +4,7 @@ import os
 import sys
 current_directory = os.getcwd()
 
-stablecommit = "9a72a59b694ce9a4599a01d59e90a03ffc0dcf82"
+stablecommit = "27d36f3f145b3724c784755ef4381adcd366d2d7"
 
 def runTerminal(cmd):
 	subprocess.call(cmd, shell=True)
@@ -75,7 +75,7 @@ command = args.command
 
 print "Packages: ", args.packages
 
-if not command in ["install", "clone", "update", "remove", "cleanpackages"]:
+if not command in ["install", "clone", "update", "remove", "cleanpackages", "compile"]:
 	print "Error, '"+command+"' is not a valid command. Must be one of 'install', 'update', 'remove'"
 	exit()
 
@@ -93,6 +93,10 @@ if command == "clone":
 if command == "update":
 	if not lammpsdirExists: cloneLammps(True)
 	updateLammps()
+
+if command == "compile":
+	if not lammpsdirExists: cloneLammps(True)
+	compile()
 
 if command == "install":
 	if not lammpsdirExists: cloneLammps(args.head)
