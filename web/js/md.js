@@ -3,6 +3,7 @@ var position = new Float32Array( 12*maxNumAtoms );
 var radii = new Float32Array( 4*maxNumAtoms );
 var vertexId = new Uint8Array( 4*maxNumAtoms );
 var indexBuffer = new Uint32Array( 6*maxNumAtoms );
+var currentScript = ""
 
 function reallocate() {
     position = new Float32Array( 12*maxNumAtoms );
@@ -34,18 +35,17 @@ var md = {
 Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
 
 var runScript = function() {
-	var content = document.getElementById("lammpsCode").value
-	
+	// var content = document.getElementById("editor").value
 	setTimeout(
 		function() { 
-			md.runCommands(content)
-			document.getElementById("runScriptButton").disabled = true;
-			document.getElementById("stopButton").disabled = false;
+			if(md.active()) {
+				md.reset()
+			}
+			md.runCommands(currentScript)
 			
 			if(!md.initialized) {
-				init()
-				animate()
 				md.initialized = true
+				animate()
 			}
 		}, 500);
 }
@@ -72,8 +72,7 @@ function init() {
 	webglwindow.appendChild( container );
 	
 	scene = new THREE.Scene();
-
-	var systemSizeHalfVec = systemSizeHalf();
+	
 	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.z = 5;
     camera.position.y = 5;
@@ -93,12 +92,10 @@ function init() {
     geometry.addAttribute( 'vertexId', new THREE.BufferAttribute( vertexId, 1 ) );
     geometry.addAttribute( 'radius', new THREE.BufferAttribute( radii, 1 ) );
     geometry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
-    updateVertices();
-
+    
     material = new THREE.ShaderMaterial( {
         uniforms: {
             time: { value: 1.0 },
-            resolution: { value: new THREE.Vector2() }
         },
         vertexShader: document.getElementById( 'vertexShader' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShader' ).textContent
@@ -107,8 +104,11 @@ function init() {
 	mesh = new THREE.Mesh( geometry, material );
 	scene.add(mesh);
 
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({ alpha: true });
+	scene.background = new THREE.Color( 0x000000 );
+	renderer.setClearColor( 0x000000, 0);
 	renderer.setPixelRatio( window.devicePixelRatio );
+	// renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.setSize( glWindowWidth(), glWindowHeight() );
 	container.appendChild( renderer.domElement );
 	onWindowResize()
@@ -119,6 +119,7 @@ function onWindowResize() {
 	camera.aspect = glWindowWidth() / glWindowHeight()
 	camera.updateProjectionMatrix();
 	renderer.setSize( glWindowWidth(), glWindowHeight() );
+	console.log("GL window size: ", glWindowWidth(), ", ", glWindowHeight())
 }
 
 function updateVertices() {
@@ -174,28 +175,15 @@ function updateVertices() {
     geometry.getAttribute("radius").needsUpdate = true
 }
 
-var stop = false;
-
 function animate() {
-	if(!stop) {
-		md.runCommands("run 1 pre no post no");
+	if(!md.active()) {
+		return;
 	}
-	
+	md.runCommands("run 1 pre no post no");
 	animationId = requestAnimationFrame( animate );
 	controls.update();
 	updateVertices();
 	render();
-}
-
-function togglePause() {
-	if(pause) {
-		document.getElementById("stopButton").innerHTML = "Pause";
-		animate();
-	} else {
-		document.getElementById("stopButton").innerHTML = "Unpause";
-		cancelAnimationFrame(animationId);
-	}
-	pause = !pause;
 }
 
 function render() {
@@ -210,9 +198,5 @@ var t0 = Date.now();
 var lights = {}
 var container;
 var animationId;
-var camera, controls, scene, renderer, particles, geometry, material, i, h, color, sprite, size;
+var camera, controls, scene, renderer, geometry, material, color;
 var mesh;
-var rightVector, upVector, viewVector;
-var mouseX = 0, mouseY = 0;
-var theta = 0, phi = 0;
-var pause = false;

@@ -1,18 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
 <head>
-	<title>LAMMPS online prototyper</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="css/bootstrap.min.css">
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/lammps.js"> </script>
-	<script src="js/Detector.js"> </script>
-	<script src="js/three.min.js"> </script>
-	<script src="js/OrbitControls.js"> </script>
-	<script src="js/md.js"> </script>
-	<script type="x-shader/x-vertex" id="vertexShader">
+<title>LAMMPS Online</title>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="codemirror/theme/monokai.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="js/jquery.min.js"></script>
+<script src="js/lammps.js"> </script>
+<script src="js/Detector.js"> </script>
+<script src="js/three.min.js"> </script>
+<script src="js/OrbitControls.js"> </script>
+<script src="js/md.js"> </script>
+
+<script src="codemirror/lib/codemirror.js"></script>
+<script src="codemirror/mode/javascript/javascript.js"></script>
+<script src="codemirror/addon/selection/active-line.js"></script>
+<script src="codemirror/addon/edit/matchbrackets.js"></script>
+<script type="x-shader/x-vertex" id="vertexShader">
 // BEGIN spheres.vsh
 attribute float vertexId;
 attribute float radius;
@@ -93,52 +97,132 @@ void main(void) {
 }
 </script>
 </head>
-<body onload="">
+<body>
+	<div id="webglwindow" class="overlay"></div>
+	<div id="editor">
+	<form><textarea id="code" name="code">
+# 3d Lennard-Jones melt
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-lg-4">
-			<button id="runScriptButton" type="button" onClick="runScript()">Run script</button><button id="stopButton" type="button" onClick="togglePause();" disabled>Pause</button>Lammps script:<br>
-			<textarea id="lammpsCode" style="width: 100%; height: 100%;" rows="20" cols="80">
-			# 3d Lennard-Jones melt
+variable	xx equal 10
+variable	yy equal 10
+variable	zz equal 10
 
-			units		lj
-			atom_style	atomic
-			atom_modify	map hash
+units		lj
+atom_style	atomic
 
-			lattice		fcc 0.8442
-			region		box block 0 10 0 10 0 10
-			create_box	1 box
-			create_atoms	1 box
-			mass		1 1.0
+lattice		fcc 0.8442
+region		box block 0 ${xx} 0 ${yy} 0 ${zz}
+create_box	1 box
+create_atoms	1 box
+mass		1 1.0
 
-			velocity	all create 1.44 87287 loop geom
+velocity	all create 1.44 87287 loop geom
 
-			pair_style	lj/cut 2.5
-			pair_coeff	1 1 1.0 1.0 2.5
+pair_style	lj/cut 2.5
+pair_coeff	1 1 1.0 1.0 2.5
 
-			neighbor	0.3 bin
-			neigh_modify	delay 0 every 20 check no
+neighbor	0.3 bin
+neigh_modify	delay 0 every 20 check no
 
-			fix		1 all nve
+fix		1 all nve
 
-			#------------------------- Computes -------------------------------------------#
-			  compute           Tcm all temp/com # Calculates temperature in the CM frame.
-			#------------------------------------------------------------------------------#
+run		100
+</textarea></form></div>
+	<div id="toolbar"></div>
+	<script>
+		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+			lineNumbers: true,
+			styleActiveLine: true,
+			matchBrackets: true,
+			viewportMargin: Infinity
+		});
+		var input = document.getElementById("select");
 
-			#------------------------- Output ---------------------------------------#
-			  thermo_style      custom step pe ke press temp # Output.
-			  thermo_modify     format float "% .6e" # Output format.
-			  thermo            20 # Output stride.
-			#------------------------------------------------------------------------------#  
+		editor.setOption("theme", "monokai");
 
-			</textarea>
-		</div>
-		<div id="webglwindow" class="col-lg-8" style="height: 100vh;">
-			
-		</div>
-	</div>
-</div>
+		var choice = (location.hash && location.hash.slice(1)) ||
+		           (document.location.search &&
+		            decodeURIComponent(document.location.search.slice(1)));
+		if (choice) {
+			input.value = choice;
+			editor.setOption("theme", choice);
+		}
+		CodeMirror.on(window, "hashchange", function() {
+			var theme = location.hash.slice(1);
+			if (theme) { input.value = theme; selectTheme(); }
+		});
 
+		// Build GUI
+		var toolbar = document.getElementById( 'toolbar' );
+		var buttonUpdate = document.createElement( 'button' );
+		buttonUpdate.className = 'button';
+
+		buttonUpdate.appendChild( document.createTextNode( 'run lammps script' ) );
+
+		buttonUpdate.addEventListener( 'click', function ( event ) {
+			var value = editor.getValue();
+			currentScript = value
+			runScript()
+		}, false );
+		toolbar.appendChild( buttonUpdate );
+
+		var buttonSave = document.createElement( 'button' );
+		buttonSave.className = 'button';
+		buttonSave.textContent = 'save';
+		buttonSave.addEventListener( 'click', function ( event ) {
+			save();
+		}, false );
+		toolbar.appendChild( buttonSave );
+
+		var buttonHide = document.createElement( 'button' );
+		buttonHide.className = 'button';
+		buttonHide.textContent = 'hide code';
+		buttonHide.addEventListener( 'click', function ( event ) {
+			var code = document.getElementById( 'editor' );
+			if ( code.style.display === '' ) {
+				buttonHide.textContent = 'show code';
+				code.style.display = 'none';
+				buttonUpdate.style.display = 'none';
+				buttonSave.style.display = 'none';
+			} else {
+				buttonHide.textContent = 'hide code';
+				code.style.display = '';
+				buttonUpdate.style.display = '';
+				buttonSave.style.display = '';
+			}
+		}, false );
+		toolbar.appendChild( buttonHide );
+
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( event.keyCode === 83 && ( event.ctrlKey === true || event.metaKey === true ) ) {
+				event.preventDefault();
+				save();
+			}
+
+			if ( event.keyCode === 82 && ( event.ctrlKey === true || event.metaKey === true ) ) {
+				event.preventDefault();
+				var value = editor.getValue();
+				currentScript = value
+				runScript()
+			}
+
+			if ( event.keyCode === 27 ) {
+				var code = document.getElementById( 'editor' );
+				if ( code.style.display === '' ) {
+					buttonHide.textContent = 'show code';
+					code.style.display = 'none';
+					buttonUpdate.style.display = 'none';
+					buttonSave.style.display = 'none';
+				} else {
+					buttonHide.textContent = 'hide code';
+					code.style.display = '';
+					buttonUpdate.style.display = '';
+					buttonSave.style.display = '';
+				}
+			}
+
+		}, false );
+
+		init();
+	</script>
 </body>
-</html>

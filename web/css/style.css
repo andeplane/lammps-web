@@ -1,0 +1,76 @@
+.CodeMirror {
+	border: 1px solid black; 
+	font-size:13px;
+	height: auto;
+	opacity: 0.85;
+}
+
+.editor {
+	opacity: 0.85;
+}
+
+.overlay {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	/*background: rgba(0, 0, 0, 1.0);*/
+	background-color: #272822;
+}
+
+html, body {
+	height: 100%;
+	background-color: #272822;
+}
+
+body {
+	margin: 0px;
+	overflow: hidden;
+	font-family: Arial;
+}
+
+a {
+	color: #ffffff;
+}
+
+h1 {
+	font-size: 20px;
+	margin-top: 0px;
+}
+
+.button {
+	font-size: 10px;
+	text-transform: uppercase;
+	text-decoration: none;
+
+	color: rgb(80,80,80);
+	border: transparent;
+	background-color: rgb(235,235,235);
+
+	margin: 2px;
+	padding: 8px 10px;
+
+	cursor: pointer;
+}
+
+.button:hover {
+	color: rgb(235,235,235);
+	background-color: rgb(80,80,80);
+}
+
+.button path {
+	stroke: rgb(80,80,80);
+}
+
+.button:hover path {
+	stroke: rgb(235,235,235);
+}
+
+#toolbar {
+	position: absolute;
+	top: 15px;
+	right: 30px;
+	text-align: right;
+	z-index: 10; /* CodeMirror sets z-index */
+}
