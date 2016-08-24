@@ -40,21 +40,23 @@ def standardPackages():
 	cleanPackages()
 	activatePackage("mc")
 	activatePackage("molecule")
+	activatePackage("manybody")
 
 def compile():
 	makeStyles()
 	runTerminal("cp lammpscontroller.cpp lammps/src")
 	runTerminal("cp lammps/src/STUBS/mpi.c lammps/src/mpi.cpp")
-	runTerminal("make -j 8")
+	runTerminal("make -j 4")
 
 def makeStyles():
 	os.chdir("./lammps/src")
 	runTerminal("/bin/bash Make.sh style")
 	os.chdir(current_directory)
 
-helpstr = "LAMMPS web compiler v 0.99.\n" + \
+helpstr = "Atomify LAMMPS Online compiler v 0.99.\n" + \
 	"LAMMPS Github repository: https://github.com/lammps/lammps\n" + \
 	"Example commands:\n" + \
+	"  python setup.py install\n" + \
 	"  python setup.py install --packages none\n" + \
 	"  python setup.py install --head --packages standard\n" + \
 	"\n" + \
