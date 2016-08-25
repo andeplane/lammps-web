@@ -1,5 +1,5 @@
 # Atomify LAMMPS Online
-A web version of Atomify LAMMPS powered by Emscripten, Codemirror and three.js.
+A web version of Atomify LAMMPS powered by Emscripten, Codemirror and three.js. You can try it [here](http://folk.uio.no/anderhaf/lammps-web/).
 
 ## What is LAMMPS? ##
 LAMMPS ([lammps.sandia.gov](http://lammps.sandia.gov), [github.com/lammps/lammps](https://github.com/lammps/lammps)) is a high performance molecular dynamics code written in c++. It is an acronym for Large-scale Atomic/Molecular Massively Parallel Simulator. With [Emscripten](http://kripken.github.io/emscripten-site/), an LLVM-to-JavaScript Compiler, it isn't too hard to compile LAMMPS into asm.js (a subset of Javascript) so it can run in any browser.
