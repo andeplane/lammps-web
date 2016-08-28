@@ -66,7 +66,7 @@ function glWindowHeight() {
 	return $('#webglwindow').height();
 }
 
-function init() {
+function initGL() {
 	var webglwindow = document.getElementById("webglwindow");
 	container = document.createElement( 'div' );
 	webglwindow.appendChild( container );
