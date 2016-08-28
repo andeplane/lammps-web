@@ -8,18 +8,6 @@ var input = document.getElementById("select");
 
 editor.setOption("theme", "monokai");
 
-var choice = (location.hash && location.hash.slice(1)) ||
-           (document.location.search &&
-            decodeURIComponent(document.location.search.slice(1)));
-if (choice) {
-	input.value = choice;
-	editor.setOption("theme", choice);
-}
-CodeMirror.on(window, "hashchange", function() {
-	var theme = location.hash.slice(1);
-	if (theme) { input.value = theme; selectTheme(); }
-});
-
 // Build GUI
 var toolbar = document.getElementById( 'toolbar' );
 var buttonUpdate = document.createElement( 'button' );
