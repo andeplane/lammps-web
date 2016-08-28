@@ -16,15 +16,19 @@
 CodeMirror.defineMode('lammps', function() {
 
   var words = {};
-  function define(style, string) {
-    var split = string.split(' ');
-    for(var i = 0; i < split.length; i++) {
-      words[split[i]] = style;
+  function define_word_list(style, word_list) {
+    for(var i = 0; i < word_list.length; i++) {
+      words[word_list[i]] = style;
     }
   };
 
+  function define(style, string) {
+    var split = string.split(' ');
+    define_word_list(style, split);
+  };
+
   // Atoms
-  define('atom', 'true false');
+  define('atom', 'true false all no yes');
 
   // Keywords
   define('keyword', 'log write_restart restart dump undump thermo thermo_modify thermo_style print ' +
@@ -40,6 +44,14 @@ CodeMirror.defineMode('lammps', function() {
     'jump next loop ' +
     'equal add sub mult div ' +
     'if then elif else EDGE NULL &');
+
+
+  define('builtin', 'delay every check');
+
+  define_word_list('builtin', lammps_pair_styles);
+  define_word_list('builtin', lammps_fix_styles);
+  define_word_list('builtin', lammps_compute_styles);
+  define_word_list('builtin', lammps_dump_styles);
 
   function tokenBase(stream, state) {
     if (stream.eatSpace()) return null;
@@ -76,14 +88,15 @@ CodeMirror.defineMode('lammps', function() {
       return 'attribute';
     }
     if (/\d/.test(ch)) {
-      stream.eatWhile(/\d/);
+      stream.eatWhile(/[\d\.]/);
       if(stream.eol() || !/\w/.test(stream.peek())) {
         return 'number';
       }
     }
-    stream.eatWhile(/[\w-]/);
+    stream.eatWhile(/[\w-\/]/);
     var cur = stream.current();
-    if (stream.peek() === '=' && /\w+/.test(cur)) return 'def';
+    if (stream.peek() === '=' && /[\w\/]+/.test(cur)) return 'def';
+    console.log(cur + ': ' + (words.hasOwnProperty(cur) ? words[cur] : ''));
     return words.hasOwnProperty(cur) ? words[cur] : null;
   }
 
