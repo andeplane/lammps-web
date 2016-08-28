@@ -96,7 +96,6 @@ CodeMirror.defineMode('lammps', function() {
     stream.eatWhile(/[\w-\/]/);
     var cur = stream.current();
     if (stream.peek() === '=' && /[\w\/]+/.test(cur)) return 'def';
-    console.log(cur + ': ' + (words.hasOwnProperty(cur) ? words[cur] : ''));
     return words.hasOwnProperty(cur) ? words[cur] : null;
   }
 
