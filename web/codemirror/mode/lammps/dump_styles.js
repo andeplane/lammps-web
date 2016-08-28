@@ -1,0 +1,1 @@
+var lammps_dump_styles = ["atom", "atom/gz", "atom/mpiio", "cfg", "cfg/gz", "cfg/mpiio", "custom", "custom/gz", "custom/mpiio", "custom/vtk", "dcd", "h5md", "image", "local", "molfile", "movie", "xtc", "xyz", "xyz/gz", "xyz/mpiio"];
