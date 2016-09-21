@@ -4,8 +4,6 @@ import os
 import sys
 current_directory = os.getcwd()
 
-stablecommit = "27d36f3f145b3724c784755ef4381adcd366d2d7"
-
 def runTerminal(cmd):
 	subprocess.call(cmd, shell=True)
 
@@ -14,15 +12,14 @@ def remove():
 	runTerminal("make clean")
 
 def cloneLammps(head):
-	runTerminal("git clone https://github.com/lammps/lammps.git")
+	runTerminal("git clone https://github.com/ovilab/lammps.git")
 	if not head:
 		os.chdir("./lammps")
-		runTerminal("git reset --hard "+stablecommit)
+		runTerminal("git checkout atomify-web")
 		os.chdir(current_directory)
 
 def updateLammps():
 	os.chdir("./lammps")
-	runTerminal("git reset --hard HEAD")
 	runTerminal("git pull")
 	os.chdir(current_directory)
 	
