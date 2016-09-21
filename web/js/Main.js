@@ -40,7 +40,7 @@ function save() {
 	var date = new Date();
 	buttonDownload.download = documents[ 0 ].filename;
 
-	buttonSave.style.display = 'none';
+	// buttonSave.style.display = 'none';
 	buttonDownload.style.display = '';
 }
 
