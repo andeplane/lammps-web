@@ -16,4 +16,10 @@ ENV PATH /usr/emsdk_portable:/usr/emsdk_portable/clang/fastcomp/build_master_64/
 
 RUN mkdir -p /app
 
+RUN groupadd -g 114 jenkins
+
+RUN useradd -u 106 -g 114 -ms /bin/bash jenkins
+
+USER jenkins
+
 CMD /bin/bash
