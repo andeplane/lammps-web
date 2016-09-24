@@ -64,7 +64,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 	styleActiveLine: true,
 	matchBrackets: true,
 	viewportMargin: Infinity,
-	evxtraKeys: {"Ctrl-Space": "autocomplete"}
+	extraKeys: {"Ctrl-Space": "autocomplete"}
 });
 
 editor.setOption("theme", "monokai");
