@@ -83,9 +83,6 @@ document.addEventListener( 'keydown', function ( event ) {
 		currentScript = value
 		runScript()
 	}
-
-	if ( event.keyCode === 27 ) { toggleEditorVisible() }
-
 }, false );
 
 initGL();
