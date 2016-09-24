@@ -1,0 +1,27 @@
+{
+  "name": "lammps-web",
+  "homepage": "https://github.com/andeplane/lammps-web",
+  "authors": [
+    "Anders Hafreager",
+    "Richard Berger"
+  ],
+  "description": "LAMMPS Online Editor",
+  "main": "index.html",
+  "keywords": [
+    "LAMMPS"
+  ],
+  "license": "GPLv3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "three.js": "^0.80.0",
+    "codemirror": "^5.19.0"
+  }
+}
