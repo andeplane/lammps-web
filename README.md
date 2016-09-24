@@ -1,8 +1,8 @@
 # Atomify LAMMPS Online
-A web version of Atomify LAMMPS powered by Emscripten, Codemirror and three.js. You can try it [here](http://folk.uio.no/anderhaf/lammps-web/).
+A web version of Atomify LAMMPS powered by Emscripten, Codemirror and three.js. You can try it [here](http://folk.uio.no/anderhaf/lammps-web/) or [here](http://editor.lammps.org).
 
 ## What is LAMMPS? ##
-LAMMPS ([lammps.sandia.gov](http://lammps.sandia.gov), [github.com/lammps/lammps](https://github.com/lammps/lammps)) is a high performance molecular dynamics code written in c++. It is an acronym for Large-scale Atomic/Molecular Massively Parallel Simulator. With [Emscripten](http://kripken.github.io/emscripten-site/), an LLVM-to-JavaScript Compiler, it isn't too hard to compile LAMMPS into asm.js (a subset of Javascript) so it can run in any browser.
+LAMMPS ([lammps.sandia.gov](http://lammps.sandia.gov), [github.com/lammps/lammps](https://github.com/lammps/lammps)) is a high performance molecular dynamics code written in C++. It is an acronym for Large-scale Atomic/Molecular Massively Parallel Simulator. With [Emscripten](http://kripken.github.io/emscripten-site/), an LLVM-to-JavaScript Compiler, it isn't too hard to compile LAMMPS into asm.js (a subset of Javascript) so it can run in any browser.
 
 ## What is Atomify LAMMPS? ##
 Atomify LAMMPS ([ovilab.net/atomify](http://ovilab.net/projects/atomify-lammps/), [github.com/computationalphysics/atomify-lammps](https://github.com/computationalphysics/atomify-lammps)) is an editor for LAMMPS with realtime visualization of atom positions and live plotting of physical quantities. 
@@ -13,12 +13,16 @@ To run the precompiled version, you only need a simple web server. An example is
 ## How to run using Node.js ##
 A precompiled version is already in the web directory. 
 * Install [Node.js](https://nodejs.org/en/)
-* Open the web directory in a terminal 
-* Install connect and serve-static with
-`npm install connect`
-`npm install serve-static`
+* Install npm
+* Install bower
+  ```bash
+  npm install -g bower
+  ```
+* Open the `web` directory in a terminal 
+* Install build prerequisites
+`npm install`
 * Start server with
-`node server.js`
+`grunt`
 * Open [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 ## Build instructions ##
