@@ -31,20 +31,7 @@ CodeMirror.defineMode('lammps', function() {
   define('atom', 'true false all no yes');
 
   // Keywords
-  define('keyword', 'log write_restart restart dump undump thermo thermo_modify thermo_style print ' +
-    'include read read_restart read_data ' +
-    'boundary units atom_style lattice region create_box create_atoms dielectric ' +
-    'delete_atoms change_box dimension replicate ' +
-    'pair_coeff pair_style pair_modify mass velocity angle_coeff angle_style ' +
-    'atom_modify atom_style bond_coeff bond_style delete_bonds kspace_style ' +
-    'kspace_modify dihedral_style dihedral_coeff improper_style improper_coeff ' +
-    'min_style fix_modify run_style timestep neighbor neigh_modify fix unfix ' +
-    'communicate newton nthreads processors reset_timestep ' +
-    'minimize run variable group compute ' +
-    'jump next loop ' +
-    'equal add sub mult div ' +
-    'if then elif else EDGE NULL &');
-
+  define_word_list('keyword', lammps_keywords);
 
   define('builtin', 'delay every check');
 
@@ -58,6 +45,12 @@ CodeMirror.defineMode('lammps', function() {
 
     var sol = stream.sol();
     var ch = stream.next();
+
+    if (sol) {
+      state.command = null;
+      state.command_tokens = null;
+      state.command_style = null;
+    }
 
     if (ch === '\\') {
       stream.next();
@@ -90,12 +83,81 @@ CodeMirror.defineMode('lammps', function() {
     if (/\d/.test(ch)) {
       stream.eatWhile(/[\d\.]/);
       if(stream.eol() || !/\w/.test(stream.peek())) {
+        if (state.command_tokens) {
+          state.command_tokens.push('number');
+        }
         return 'number';
       }
     }
     stream.eatWhile(/[\w-\/]/);
     var cur = stream.current();
     if (stream.peek() === '=' && /[\w\/]+/.test(cur)) return 'def';
+
+    if (cur == "fix") {
+     state.command_tokens = ["keyword"];
+     state.command = 'fix';
+    }
+
+    if (cur == "pair_style") {
+     state.command_tokens = ["keyword"];
+     state.command = 'pair_style';
+    }
+
+    if (cur == "group") {
+     state.command_tokens = ["keyword"];
+     state.command = 'group';
+    }
+
+    if (state.command == 'fix') {
+      switch(state.command_tokens.length) {
+      case 1:
+        // expect ident
+        if(!words.hasOwnProperty(cur)) {
+            state.command_tokens.push('ident');
+        }
+        break;
+
+      case 2:
+        // expect group name
+        if(cur == 'all' || !words.hasOwnProperty(cur)) {
+            state.command_tokens.push('group');
+        }
+        break;
+
+      case 3:
+        // expect fix style name
+        if (words.hasOwnProperty(cur) && words[cur] == 'builtin') {
+            state.command_tokens.push('builtin');
+            state.command_style = cur;
+        }
+        break;
+      }
+    }
+
+    if (state.command == 'pair_style') {
+      switch(state.command_tokens.length) {
+      case 1:
+        // expect pair style name
+        if (words.hasOwnProperty(cur) && words[cur] == 'builtin') {
+            state.command_tokens.push('builtin');
+            state.command_style = cur;
+        }
+        break;
+      }
+    }
+
+    if (state.command == 'group') {
+      switch(state.command_tokens.length) {
+      case 1:
+        // expect group name
+        if (!words.hasOwnProperty(cur)) {
+            state.command_tokens.push('ident');
+            state.groups.push(cur);
+        }
+        break;
+      }
+    }
+
     return words.hasOwnProperty(cur) ? words[cur] : null;
   }
 
@@ -143,7 +205,7 @@ CodeMirror.defineMode('lammps', function() {
   };
 
   return {
-    startState: function() {return {tokens:[]};},
+    startState: function() {return {tokens:[], groups:['all']};},
     token: function(stream, state) {
       return tokenize(stream, state);
     },
