@@ -12,20 +12,32 @@ To run the precompiled version, you only need a simple web server. An example is
 
 ## How to run using Node.js ##
 A precompiled version is already in the web directory. 
-* Install [Node.js](https://nodejs.org/en/)
-* Install npm
+* Install [Node.js](https://nodejs.org/en/) and npm
 * Install bower
+
   ```bash
   npm install -g bower
   ```
-* Open the `web` directory in a terminal 
-* Install build prerequisites
-`npm install`
+* Open the `web` directory in a terminal and install build prerequisites
+
+ ```bash
+ cd web/
+ npm install
+ ```
+
 * Start server with
-`grunt`
+
+  ```bash
+  grunt
+  ```
+  
 * Open [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 ## Build instructions ##
 You will need the [Emscripten](http://kripken.github.io/emscripten-site/) compiler (instructions in the link). Once you have that, just open the directory containing this README.md file and run
-`python setup.py install`
+
+```bash
+python setup.py install
+```
+
 This will clone LAMMPS from [github.com/lammps/lammps](https://github.com/lammps/lammps), compile it and copy the new version of LAMMPS into the web directory. 
