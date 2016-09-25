@@ -4,10 +4,12 @@ MAXMEMORY = 128000000
 LAMMPS_SOURCE := $(wildcard lammps/src/*.cpp)
 LAMMPS_OBJ_FILES := $(addprefix obj/,$(notdir $(LAMMPS_SOURCE:.cpp=.o)))
 
-LD_FLAGS := -O3
-CC_FLAGS := -O3 -DLAMMPS_EXCEPTIONS 
+LD_FLAGS := -O2 --bind
+CC_FLAGS := -O2 -DLAMMPS_EXCEPTIONS -std=c++11 --bind
+#LD_FLAGS := 
+#CC_FLAGS := -DLAMMPS_EXCEPTIONS -std=c++11 --bind
 INCLUDE_FLAGS := -Ilammps/src/STUBS/ -Ilammps/src
-SYMBOLS := -s ASSERTIONS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s TOTAL_MEMORY=$(MAXMEMORY) -s EXPORTED_FUNCTIONS="['_runCommands', '_numberOfAtoms', '_reset', '_runDefaultScript', '_systemSizeX', '_systemSizeY', '_systemSizeZ', '_positions', '_x', '_v', '_f', '_active']"
+SYMBOLS := -s ASSERTIONS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s TOTAL_MEMORY=$(MAXMEMORY)
 lammpsjs: obj web/lammps.js
 
 lammpshtml: obj lammps.html

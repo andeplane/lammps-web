@@ -12,14 +12,6 @@ function createGUI() {
 	}, false );
 	toolbar.appendChild( buttonUpdate );
 
-	// buttonSave = document.createElement( 'button' );
-	// buttonSave.className = 'button';
-	// buttonSave.textContent = 'save';
-	// buttonSave.addEventListener( 'click', function ( event ) {
-	// 	save();
-	// }, false );
-	// toolbar.appendChild( buttonSave );
-
 	buttonHide = document.createElement( 'button' );
 	buttonHide.className = 'button';
 	buttonHide.textContent = 'hide code';
@@ -69,7 +61,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 editor.setOption("theme", "monokai");
 
-createGUI()
+// createGUI()
 
 document.addEventListener( 'keydown', function ( event ) {
 	if ( event.keyCode === 83 && ( event.ctrlKey === true || event.metaKey === true ) ) {
@@ -88,4 +80,4 @@ document.addEventListener( 'keydown', function ( event ) {
 
 }, false );
 
-initGL();
+// initGL();

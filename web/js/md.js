@@ -17,6 +17,7 @@ function reallocate() {
 }
 
 var md = {
+	lammpsController: new Module.LAMMPSController(),
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
 	active: Module.cwrap('active', 'bool', []),
 	reset: Module.cwrap('reset', 'void', []),

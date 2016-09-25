@@ -16,109 +16,63 @@
 #include <vector>
 #include <cstring>
 
+#include <error.h>
 #include <atom.h>
 #include <domain.h>
 #include <lammps.h>
 #include <library.h>
 #include <input.h>
+#include <emscripten/bind.h>
+#include "lammpscontroller.h"
 
-using namespace LAMMPS_NS;
-using namespace std;
+using namespace emscripten;
 
-LAMMPS *lammps = 0;
-vector<string> commands;
-bool runCommandActive = false;
-int simulationSpeed = 1;
-extern "C" {
-void reset() {
-    if(lammps) {
-        lammps_close((void*)lammps);
-        lammps = 0;
-    }
-    lammps_open_no_mpi(0, 0, (void**)&lammps);
-    lammps->screen = NULL;
-    commands.clear();
-    runCommandActive = false;
+LAMMPSController::LAMMPSController() :
+    m_currentException("")
+{
+
 }
 
-int numberOfAtoms() {
-    return lammps->atom->natoms;
-}
-
-bool active() {
-    return lammps != 0;
-}
-
-double systemSizeX() {
-    return lammps->domain->xprd;
-}
-
-double systemSizeY() {
-    return lammps->domain->xprd;
-}
-
-double systemSizeZ() {
-    return lammps->domain->xprd;
-}
-
-double *positions() {
-    return lammps->atom->x[0];
-}
-
-double **x() {
-    return lammps->atom->x;
-}
-
-double **v() {
-    return lammps->atom->v;
-}
-
-double **f() {
-    return lammps->atom->f;
-}
-
-void runCommands(const char *commands) {
-    if(!lammps) {
-        reset();
-    }
-
-    std::stringstream ss(commands);
-    std::string to;
-
-    if (commands != NULL)
-    {
-        while(std::getline(ss,to,'\n')){
-            lammps->input->one(to.c_str());
-        }
+void LAMMPSController::executeCommandInLAMMPS(std::string command) {
+    char cmd[1000];
+    std::strcpy(cmd, command.c_str());
+    lammps_command((void*)m_lammps, cmd);
+    char *lammpsError = m_lammps->error->get_last_error();
+    if(lammpsError != NULL) {
+        m_currentException =  LAMMPSException(lammpsError); // Store a copy of the exception to communicate to GUI
+        m_exceptionHandled = false;
+        m_state.crashed = true;
     }
 }
 
-void runDefaultScript() {
-    const char * defaultScript = 
-        "# 3d Lennard-Jones melt\n"
-        "variable    x index 1\n"
-        "variable    y index 1\n"
-        "variable    z index 1\n"
-        "variable    xx equal 20*$x\n"
-        "variable    yy equal 20*$y\n"
-        "variable    zz equal 20*$z\n"
-        "units       lj\n"
-        "atom_style  atomic\n"
-        "lattice     fcc 0.8442\n"
-        "region      box block 0 ${xx} 0 ${yy} 0 ${zz}\n"
-        "create_box  1 box\n"
-        "create_atoms    1 box\n"
-        "mass        1 1.0\n"
-        "velocity    all create 1.44 87287 loop geom\n"
-        "pair_style  lj/cut 2.5\n"
-        "pair_coeff  1 1 1.0 1.0 2.5\n"
-        "neighbor    0.3 bin\n"
-        "neigh_modify    delay 0 every 20 check no\n"
-        "fix     1 all nve\n"
-        "run     10\n"
-        "run     100\n";
-
-    runCommands(defaultScript);
+void LAMMPSController::tick() {
+    if(m_lammps == nullptr || m_state.crashed || m_state.paused) {
+        return;
+    }
 }
 
+void LAMMPSController::reset() {
+    if(m_lammps) {
+        lammps_close((void*)m_lammps);
+        m_lammps = 0;
+    }
+    lammps_open_no_mpi(0, 0, (void**)&m_lammps);
+    m_lammps->screen = NULL;
+    m_state = State();
+}
+
+double** LAMMPSController::x() {
+    if(!m_lammps) return nullptr;
+    return m_lammps->atom->x;
+}
+// .function("lammps", &LAMMPSController::lammps, allow_raw_pointers())
+// Binding code
+EMSCRIPTEN_BINDINGS(lammpscontroller) {
+  class_<LAMMPSController>("LAMMPSController")
+    .constructor<>()
+    .function("reset", &LAMMPSController::reset)
+    .function("tick", &LAMMPSController::tick)
+    .function("numberOfAtoms", &LAMMPSController::numberOfAtoms)
+    .function("x", &LAMMPSController::x, allow_raw_pointers())
+    ;
 }
