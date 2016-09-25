@@ -63,7 +63,8 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 	lineNumbers: true,
 	styleActiveLine: true,
 	matchBrackets: true,
-	viewportMargin: Infinity
+	viewportMargin: Infinity,
+	extraKeys: {"Ctrl-Space": "autocomplete"}
 });
 
 editor.setOption("theme", "monokai");
@@ -82,9 +83,6 @@ document.addEventListener( 'keydown', function ( event ) {
 		currentScript = value
 		runScript()
 	}
-
-	if ( event.keyCode === 27 ) { toggleEditorVisible() }
-
 }, false );
 
 initGL();
