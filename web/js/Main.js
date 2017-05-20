@@ -4,7 +4,8 @@ function createGUI() {
 	var toolbar = document.getElementById( 'toolbar' );
 	buttonUpdate = document.createElement( 'button' );
 	buttonUpdate.className = 'button';
-	buttonUpdate.appendChild( document.createTextNode( 'run lammps script' ) );
+	buttonUpdate.disabled = true
+	buttonUpdate.appendChild( document.createTextNode( 'Loading ...' ) );
 	buttonUpdate.addEventListener( 'click', function ( event ) {
 		var value = editor.getValue();
 		currentScript = value
@@ -85,4 +86,8 @@ document.addEventListener( 'keydown', function ( event ) {
 	}
 }, false );
 
+Module['_main'] = function() {
+	buttonUpdate.disabled = false
+	buttonUpdate.innerHTML = "run lammps script"
+}
 initGL();
