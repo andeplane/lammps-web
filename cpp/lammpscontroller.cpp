@@ -65,7 +65,7 @@ void setCallback(FnPtr cb) {
 }
 
 int numberOfAtoms() {
-    return lammps->atom->natoms;
+    return lammps_get_natoms(lammps);
 }
 
 bool active() {
@@ -85,7 +85,8 @@ double systemSizeZ() {
 }
 
 double *positions() {
-    return lammps->atom->x[0];
+    double **x = (double**)lammps_extract_atom((void*)lammps, "x");
+    return x[0];
 }
 
 double **x() {

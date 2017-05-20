@@ -41,7 +41,9 @@ def standardPackages():
 
 def compile():
 	makeStyles()
-	runTerminal("cp lammpscontroller.cpp lammps/src")
+	runTerminal("cp cpp/lammpscontroller.cpp lammps/src")
+	runTerminal("cp cpp/fix_atomify.cpp lammps/src")
+	runTerminal("cp cpp/fix_atomify.h lammps/src")
 	runTerminal("cp lammps/src/STUBS/mpi.c lammps/src/mpi.cpp")
 	runTerminal("make -j 4 wasm")
 

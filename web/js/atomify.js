@@ -4,6 +4,7 @@ var lammpsPtr = -1
 
 var Atomify = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
+	setCallback: Module.cwrap("setCallback", "void", ["number"]),
 	active: Module.cwrap('active', 'bool', []),
 	reset: Module.cwrap('reset', 'number', []),
 	runDefault: Module.cwrap('runDefaultScript', 'void', []),
