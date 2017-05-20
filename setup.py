@@ -43,7 +43,7 @@ def compile():
 	makeStyles()
 	runTerminal("cp lammpscontroller.cpp lammps/src")
 	runTerminal("cp lammps/src/STUBS/mpi.c lammps/src/mpi.cpp")
-	runTerminal("make -j 4")
+	runTerminal("make -j 4 wasm")
 
 def makeStyles():
 	os.chdir("./lammps/src")
