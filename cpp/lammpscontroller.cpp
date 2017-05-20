@@ -16,7 +16,9 @@
 #include <vector>
 #include <cstring>
 
+#include <fix_atomify.h>
 #include <atom.h>
+#include <modify.h>
 #include <domain.h>
 #include <lammps.h>
 #include <library.h>
@@ -25,6 +27,8 @@
 using namespace LAMMPS_NS;
 using namespace std;
 
+typedef void (*FnPtr)(void *, int);
+FnPtr callback;
 LAMMPS *lammps = 0;
 
 extern "C" {
@@ -35,6 +39,29 @@ void* reset() {
     }
     lammps_open_no_mpi(0, 0, (void**)&lammps);
     return lammps;
+}
+
+void addAtomifyFix()
+{
+    if(!lammps) {
+        printf("Error, could not add fix atomify since LAMMPS object is not created");
+        exit(0);
+    }
+
+    lammps_command(lammps, "fix atomify all atomify");
+    
+    LAMMPS_NS::LAMMPS *lmp = static_cast<LAMMPS_NS::LAMMPS *>(lammps);
+    int ifix = lmp->modify->find_fix("atomify");
+    if (ifix < 0) {
+        printf("Error, could not create fix atomify");
+        exit(1);
+    }
+    LAMMPS_NS::FixAtomify *fix = static_cast<LAMMPS_NS::FixAtomify*>(lmp->modify->fix[ifix]);
+    fix->set_callback(callback, nullptr);
+}
+
+void setCallback(FnPtr cb) {
+    callback = cb;
 }
 
 int numberOfAtoms() {
