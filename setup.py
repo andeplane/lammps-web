@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+import shutil
 import sys
 current_directory = os.getcwd()
 
@@ -41,10 +42,12 @@ def standardPackages():
 
 def compile():
 	makeStyles()
-	runTerminal("cp cpp/lammpscontroller.cpp lammps/src")
-	runTerminal("cp cpp/fix_atomify.cpp lammps/src")
-	runTerminal("cp cpp/fix_atomify.h lammps/src")
-	runTerminal("cp lammps/src/STUBS/mpi.c lammps/src/mpi.cpp")
+	runTerminal("patch -f %s < %s" % (os.path.join("lammps","src","modify.cpp"), os.path.join("patches", "modify.cpp.patch"))) 
+	shutil.copy(os.path.join("cpp", "lammpscontroller.cpp"), os.path.join("lammps","src"))
+	shutil.copy(os.path.join("cpp", "fix_atomify.cpp"), os.path.join("lammps","src"))
+	shutil.copy(os.path.join("cpp", "fix_atomify.h"), os.path.join("lammps","src"))
+	shutil.copy(os.path.join("lammps", "src", "STUBS", "mpi.c"), os.path.join("lammps","src", "mpi.cpp"))
+
 	runTerminal("make -j 4 wasm")
 
 def makeStyles():

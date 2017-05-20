@@ -1,4 +1,3 @@
-var callback
 var buttonUpdate, buttonSave, buttonHide
 function createGUI() {
 	// Build GUI
@@ -88,7 +87,7 @@ document.addEventListener( 'keydown', function ( event ) {
 }, false );
 
 Module['_main'] = function() {
-	var callbackPointer = Runtime.addFunction(callback)
+	var callbackPointer = Runtime.addFunction(synchronizeLAMMPS)
 	Atomify.setCallback(callbackPointer)
 	
 	buttonUpdate.disabled = false

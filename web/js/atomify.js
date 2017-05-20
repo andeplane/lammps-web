@@ -4,6 +4,7 @@ var lammpsPtr = -1
 
 var Atomify = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
+	addAtomifyFix: Module.cwrap("addAtomifyFix", "void", []),
 	setCallback: Module.cwrap("setCallback", "void", ["number"]),
 	active: Module.cwrap('active', 'bool', []),
 	reset: Module.cwrap('reset', 'number', []),
@@ -37,8 +38,10 @@ var runScript = function() {
 		function() { 
 			if(lammpsPtr === -1) {
 				lammpsPtr = Atomify.reset()
+				// Atomify.addAtomifyFix()
 			} else if(Atomify.active()) {
 				lammpsPtr = Atomify.reset()
+				// Atomify.addAtomifyFix()
 			}
 			Atomify.runCommands(currentScript)
 			
@@ -47,6 +50,19 @@ var runScript = function() {
 				animate()
 			}
 		}, 500);
+}
+
+function synchronizeLAMMPS()
+{
+	if(!Atomify.active()) {
+		return;
+	}
+
+	console.log("Synchronizing LAMMPS")
+	animationId = requestAnimationFrame( animate );
+	controls.update();
+	updateVertices()
+	render();
 }
 
 function systemSize() {

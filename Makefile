@@ -7,7 +7,7 @@ LAMMPS_OBJ_FILES := $(addprefix obj/,$(notdir $(LAMMPS_SOURCE:.cpp=.o)))
 LD_FLAGS := -O3
 CC_FLAGS := -O3 -DLAMMPS_EXCEPTIONS -DLAMMPS_SMALLSMALL
 INCLUDE_FLAGS := -Ilammps/src/STUBS/ -Ilammps/src
-SYMBOLS := -s ASSERTIONS=2 -s RESERVED_FUNCTION_POINTERS=1 -s DISABLE_EXCEPTION_CATCHING=0 -s TOTAL_MEMORY=$(MAXMEMORY) -s EXPORTED_FUNCTIONS="['_runCommands', '_numberOfAtoms', '_setCallback', '_reset', '_runDefaultScript', '_systemSizeX', '_systemSizeY', '_systemSizeZ', '_positions', '_x', '_v', '_f', '_active', '_lammps_command', '_lammps_commands_string', '_lammps_extract_setting', '_lammps_get_natoms', '_lammps_extract_global', '_lammps_extract_atom', '_lammps_extract_compute', '_lammps_extract_fix', '_lammps_extract_variable', '_lammps_set_variable', '_lammps_get_thermo', '_lammps_has_error', '_lammps_get_last_error_message']"
+SYMBOLS := -s ASSERTIONS=2 -s RESERVED_FUNCTION_POINTERS=1 -s DISABLE_EXCEPTION_CATCHING=0 -s TOTAL_MEMORY=$(MAXMEMORY) -s EXPORTED_FUNCTIONS="['_runCommands', '_addAtomifyFix', '_numberOfAtoms', '_setCallback', '_reset', '_runDefaultScript', '_systemSizeX', '_systemSizeY', '_systemSizeZ', '_positions', '_x', '_v', '_f', '_active', '_lammps_command', '_lammps_commands_string', '_lammps_extract_setting', '_lammps_get_natoms', '_lammps_extract_global', '_lammps_extract_atom', '_lammps_extract_compute', '_lammps_extract_fix', '_lammps_extract_variable', '_lammps_set_variable', '_lammps_get_thermo', '_lammps_has_error', '_lammps_get_last_error_message']"
 asm: obj web/js/lammps.js
 wasm: obj web/js/lammpswasm.js
 html: obj lammps.html
