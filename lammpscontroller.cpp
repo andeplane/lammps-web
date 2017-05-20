@@ -36,7 +36,6 @@ void reset() {
         lammps = 0;
     }
     lammps_open_no_mpi(0, 0, (void**)&lammps);
-    lammps->screen = NULL;
     commands.clear();
     runCommandActive = false;
 }
