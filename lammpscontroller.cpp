@@ -26,18 +26,15 @@ using namespace LAMMPS_NS;
 using namespace std;
 
 LAMMPS *lammps = 0;
-vector<string> commands;
-bool runCommandActive = false;
-int simulationSpeed = 1;
+
 extern "C" {
-void reset() {
+void* reset() {
     if(lammps) {
         lammps_close((void*)lammps);
         lammps = 0;
     }
     lammps_open_no_mpi(0, 0, (void**)&lammps);
-    commands.clear();
-    runCommandActive = false;
+    return lammps;
 }
 
 int numberOfAtoms() {
