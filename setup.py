@@ -15,7 +15,7 @@ def cloneLammps(head):
 	runTerminal("git clone https://github.com/ovilab/lammps.git")
 	if not head:
 		os.chdir("./lammps")
-		runTerminal("git checkout atomify-web")
+		runTerminal("git checkout master")
 		os.chdir(current_directory)
 
 def updateLammps():
