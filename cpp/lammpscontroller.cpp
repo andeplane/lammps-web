@@ -17,18 +17,26 @@
 #include <cstring>
 
 #include <fix_atomify.h>
-#include <atom.h>
 #include <modify.h>
-#include <domain.h>
 #include <lammps.h>
 #include <library.h>
-#include <input.h>
 
 using namespace LAMMPS_NS;
 using namespace std;
 
 typedef void (*FnPtr)(void *, int);
+struct Box {
+    double boxlo[3];
+    double boxhi[3];
+    double xy;
+    double yz;
+    double xz;
+    int periodicity[3];
+    int box_change;
+};
+
 FnPtr callback;
+Box box;
 LAMMPS *lammps = 0;
 
 extern "C" {
@@ -73,20 +81,18 @@ bool active() {
 }
 
 double systemSizeX() {
-    return lammps->domain->xprd;
+    lammps_extract_box((void*)lammps, box.boxlo, box.boxhi, &box.xy, &box.yz, &box.xz, box.periodicity, &box.box_change);
+    return box.boxhi[0]-box.boxlo[0];
 }
 
 double systemSizeY() {
-    return lammps->domain->yprd;
+    lammps_extract_box((void*)lammps, box.boxlo, box.boxhi, &box.xy, &box.yz, &box.xz, box.periodicity, &box.box_change);
+    return box.boxhi[1]-box.boxlo[1];
 }
 
 double systemSizeZ() {
-    return lammps->domain->zprd;
-}
-
-double *positions() {
-    double **x = (double**)lammps_extract_atom((void*)lammps, "x");
-    return x[0];
+    lammps_extract_box((void*)lammps, box.boxlo, box.boxhi, &box.xy, &box.yz, &box.xz, box.periodicity, &box.box_change);
+    return box.boxhi[2]-box.boxlo[2];
 }
 
 double **x() {
@@ -99,6 +105,10 @@ double **v() {
 
 double **f() {
     return (double**)lammps_extract_atom((void*)lammps, "f");
+}
+
+double *positions() {
+    return x()[0];
 }
 
 void runCommands(char *commands) {
