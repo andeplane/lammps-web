@@ -81,16 +81,16 @@ function onWindowResize() {
 function updateVertices() {
 	var systemSizeHalfVec = systemSizeHalf();
 	var systemSizeVec = systemSize();
-	if(maxNumAtoms !== md.numberOfAtoms()) {
-		maxNumAtoms = md.numberOfAtoms()
+	if(maxNumAtoms !== Atomify.numberOfAtoms()) {
+		maxNumAtoms = Atomify.numberOfAtoms()
 		console.log("Reallocating memory to support ", maxNumAtoms, " atoms.")
 		reallocate()
 	}
 
-	for ( i = 0; i < md.numberOfAtoms(); i ++ ) {
-		var x = getValue(md.positions() + 24*i, 'double') - systemSizeHalfVec.x;
-		var y = getValue(md.positions() + 24*i + 8, 'double') - systemSizeHalfVec.y;
-		var z = getValue(md.positions() + 24*i + 16, 'double') - systemSizeHalfVec.z;
+	for ( i = 0; i < Atomify.numberOfAtoms(); i ++ ) {
+		var x = getValue(Atomify.positions() + 24*i, 'double') - systemSizeHalfVec.x;
+		var y = getValue(Atomify.positions() + 24*i + 8, 'double') - systemSizeHalfVec.y;
+		var z = getValue(Atomify.positions() + 24*i + 16, 'double') - systemSizeHalfVec.z;
 
 		var radius = 0.1;
 		position[12*i+0] = x;
@@ -132,10 +132,10 @@ function updateVertices() {
 }
 
 function animate() {
-	if(!md.active()) {
+	if(!Atomify.active()) {
 		return;
 	}
-	md.runCommands("run 1 pre no post no");
+	Atomify.runCommands("run 1 pre no post no");
 	animationId = requestAnimationFrame( animate );
 	controls.update();
 	updateVertices();

@@ -2,7 +2,7 @@ var maxNumAtoms = 10;
 var currentScript = ""
 var lammpsPtr = -1
 
-var md = {
+var Atomify = {
 	runCommands: Module.cwrap('runCommands', 'void', ['string']),
 	active: Module.cwrap('active', 'bool', []),
 	reset: Module.cwrap('reset', 'number', []),
@@ -35,21 +35,21 @@ var runScript = function() {
 	setTimeout(
 		function() { 
 			if(lammpsPtr === -1) {
-				lammpsPtr = md.reset()
-			} else if(md.active()) {
-				lammpsPtr = md.reset()
+				lammpsPtr = Atomify.reset()
+			} else if(Atomify.active()) {
+				lammpsPtr = Atomify.reset()
 			}
-			md.runCommands(currentScript)
+			Atomify.runCommands(currentScript)
 			
-			if(!md.initialized) {
-				md.initialized = true
+			if(!Atomify.initialized) {
+				Atomify.initialized = true
 				animate()
 			}
 		}, 500);
 }
 
 function systemSize() {
-	return new THREE.Vector3(md.systemSizeX(), md.systemSizeY(), md.systemSizeZ());;
+	return new THREE.Vector3(Atomify.systemSizeX(), Atomify.systemSizeY(), Atomify.systemSizeZ());;
 }
 
 function systemSizeHalf() {
