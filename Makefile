@@ -1,5 +1,5 @@
 CXX = emcc
-MAXMEMORY = 128000000
+MAXMEMORY = 512MB
 
 LAMMPS_SOURCE := $(wildcard lammps/src/*.cpp)
 LAMMPS_OBJ_FILES := $(addprefix obj/,$(notdir $(LAMMPS_SOURCE:.cpp=.o)))
