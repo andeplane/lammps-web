@@ -77,11 +77,11 @@ double systemSizeX() {
 }
 
 double systemSizeY() {
-    return lammps->domain->xprd;
+    return lammps->domain->yprd;
 }
 
 double systemSizeZ() {
-    return lammps->domain->xprd;
+    return lammps->domain->zprd;
 }
 
 double *positions() {
@@ -90,35 +90,27 @@ double *positions() {
 }
 
 double **x() {
-    return lammps->atom->x;
+    return (double**)lammps_extract_atom((void*)lammps, "x");
 }
 
 double **v() {
-    return lammps->atom->v;
+    return (double**)lammps_extract_atom((void*)lammps, "v");
 }
 
 double **f() {
-    return lammps->atom->f;
+    return (double**)lammps_extract_atom((void*)lammps, "f");
 }
 
-void runCommands(const char *commands) {
+void runCommands(char *commands) {
     if(!lammps) {
         reset();
     }
 
-    std::stringstream ss(commands);
-    std::string to;
-
-    if (commands != NULL)
-    {
-        while(std::getline(ss,to,'\n')){
-            lammps->input->one(to.c_str());
-        }
-    }
+    lammps_commands_string((void*)lammps, commands);
 }
 
 void runDefaultScript() {
-    const char * defaultScript = 
+    char * defaultScript = 
         "# 3d Lennard-Jones melt\n"
         "variable    x index 1\n"
         "variable    y index 1\n"
