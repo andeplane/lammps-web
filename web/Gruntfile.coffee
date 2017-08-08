@@ -59,6 +59,16 @@ module.exports = (grunt) ->
         },
         {
           expand: true
+          src: "lammpswasm.asm.js"
+          dest: "_site/"
+        },
+        {
+          expand: true
+          src: "lammpswasm.js.mem"
+          dest: "_site/"
+        },
+        {
+          expand: true
           src: "css/*"
           dest: "_site/"
         },
