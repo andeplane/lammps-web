@@ -12,7 +12,7 @@ RUN cd /usr/emsdk-portable && \
     ./emsdk install latest && \
     ./emsdk activate latest
 
-ENV PATH /usr/emsdk_portable:/usr/emsdk_portable/clang/fastcomp/build_master_64/bin:/usr/emsdk_portable/node/4.1.1_64bit/bin:/usr/emsdk_portable/emscripten/master:$PATH
+ENV PATH /usr/emsdk-portable:/usr/emsdk-portable/clang/fastcomp/build_master_64/bin:/usr/emsdk-portable/node/4.1.1_64bit/bin:/usr/emsdk-portable/emscripten/master:$PATH
 
 RUN mkdir -p /app
 
