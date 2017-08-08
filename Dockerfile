@@ -12,9 +12,12 @@ RUN cd /usr/emsdk-portable && \
     ./emsdk install latest && \
     ./emsdk activate latest
 
-RUN chmod 755 /usr/emsdk-portable
 
-ENV PATH /usr/emsdk-portable:/usr/emsdk-portable/clang/e1.37.16_64bit:/usr/emsdk-portable/node/4.1.1_64bit/bin:/usr/emsdk-portable/emscripten/1.37.16:$PATH
+ENV PATH /usr/emsdk-portable/clang/e1.37.16_64bit:/usr/emsdk-portable/node/4.1.1_64bit/bin:/usr/emsdk-portable/emscripten/1.37.16:$PATH
+ENV EMSDK /usr/emsdk-portable
+ENV BINARYEN_ROOT /usr/emsdk-portable/clang/e1.37.16_64bit/binaryen
+
+ENV EMSCRIPTEN /usr/emsdk-portable/emscripten/1.37.16
 
 RUN mkdir -p /app
 
@@ -22,6 +25,12 @@ RUN groupadd -g 114 jenkins
 
 RUN useradd -u 106 -g 114 -ms /bin/bash jenkins
 
+RUN chown -R jenkins:jenkins /usr/emsdk-portable
+
 USER jenkins
+
+RUN /usr/emsdk-portable/emsdk activate
+
+ENV EM_CONFIG=/home/jenkins/.emscripten
 
 CMD /bin/bash
