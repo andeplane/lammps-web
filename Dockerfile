@@ -7,7 +7,7 @@ RUN apt update && apt install -y wget build-essential cmake git python
 RUN wget -qO /tmp/emsdk-portable.tar.gz https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz && \
     tar xvzf /tmp/emsdk-portable.tar.gz -C /usr && rm /tmp/emsdk-portable.tar.gz
 
-RUN cd /usr/emsdk_portable && \
+RUN cd /usr/emsdk-portable && \
     ./emsdk update && \
     ./emsdk install latest && \
     ./emsdk activate latest
