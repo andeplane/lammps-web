@@ -1,3 +1,5 @@
+# This project is replaced by https://github.com/andeplane/atomify
+
 # Atomify LAMMPS Online
 A web version of Atomify LAMMPS powered by Emscripten, Codemirror and three.js. You can try it [here](http://folk.uio.no/anderhaf/lammps-web/) or [here](http://editor.lammps.org).
 
